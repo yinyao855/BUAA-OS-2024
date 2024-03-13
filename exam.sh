@@ -20,8 +20,9 @@ gcc *.o -o ../hello
 
 mv err.txt ../../
 
-chmod rw-r-xr-x err.txt
+cd ../../
+chmod u+rw-r-xr-x err.txt
 
 line=$(($1+$2))
 
-sed -n '$linep' err.txt >&2 
+sed -n '$linep' err.txt 
