@@ -24,6 +24,8 @@ mv err.txt ../
 
 cd ../
 
+chmod u+rw-r-xr-x err.txt
+
 line=2
 
 if [ $# -eq 0 ]
@@ -38,4 +40,4 @@ fi
 
 sed -n "$line p" err.txt >&2 
 
-chmod u+rw-r-xr-x err.txt
+#chmod u+rw-r-xr-x err.txt
