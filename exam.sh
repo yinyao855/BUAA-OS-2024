@@ -21,8 +21,19 @@ gcc *.o -o ../hello
 mv err.txt ../../
 
 cd ../../
+
+line=2
+
+if [ $# -eq 0 ]
+then
+	line=2
+elif [ $# -eq 1 ]
+then
+	line=$(($1+1))
+else
+	line=$(($1+$2))
+fi
+
+sed -n "$line p" err.txt >&2 
+
 chmod u+rw-r-xr-x err.txt
-
-line=$(($1+$2))
-
-sed -n '$linep' err.txt 
