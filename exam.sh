@@ -24,7 +24,7 @@ mv err.txt ../
 
 cd ../
 
-chmod u+rw-r-xr-x err.txt
+chmod ugo+rw-r-xr-x err.txt
 
 line=2
 
