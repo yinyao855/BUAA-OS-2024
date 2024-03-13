@@ -20,9 +20,9 @@ cd ../
 
 ./hello 2> err.txt
 
-mv err.txt ../../
+mv err.txt ../
 
-cd ../../
+cd ../
 
 line=2
 
