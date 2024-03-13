@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 mkdir test
 cp -r code test/
