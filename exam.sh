@@ -16,6 +16,8 @@ done
 
 gcc *.o -o ../hello
 
+cd ../
+
 ./hello 2> err.txt
 
 mv err.txt ../../
