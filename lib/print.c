@@ -41,11 +41,15 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 
 		/* check format flag */
 		/* Exercise 1.4: Your code here. (5/8) */
+		ladjust = 0;
 		if (*fmt == '-') {
 			ladjust = 1;
 			fmt++;
-		} else {
-			ladjust = 0;
+		}
+		padc = ' ';
+		if (*fmt == '0') {
+			padc = '0';
+			fmt++;
 		}
 
 		/* get width */
