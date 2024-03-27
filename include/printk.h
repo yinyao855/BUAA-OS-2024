@@ -6,6 +6,9 @@
 
 void printk(const char *fmt, ...);
 
+// include/printk.h
+int scanf(const char *fmt, ...);
+
 void _panic(const char *, int, const char *, const char *, ...)
 #ifdef MOS_HANG_ON_PANIC
     __attribute__((noreturn))
