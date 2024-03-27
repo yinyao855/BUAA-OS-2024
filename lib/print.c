@@ -4,11 +4,13 @@
 static void print_char(fmt_callback_t, void *, char, int, int);
 static void print_str(fmt_callback_t, void *, const char *, int, int);
 static void print_num(fmt_callback_t, void *, unsigned long, int, int, int, int, char, int);
+static void print_positon(fmt_callback_t, void *, long, long, int, int, int, char, int);
 
 void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 	char c;
 	const char *s;
 	long num;
+	long num2;
 
 	int width;
 	int long_flag; // output is long (rather than int)
@@ -154,6 +156,17 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 			fmt--;
 			break;
 
+		case 'P':
+			if (long_flag) {
+				num = va_arg(ap, long int);
+				num2 = va_arg(ap, long int);
+			} else {
+				num = va_arg(ap, int);
+				num2 = va_arg(ap, int);
+			}
+			print_positon(out, data, num, num2, 10, width, ladjust, padc, 0);
+			break;
+
 		default:
 			/* output this char as it is */
 			out(data, fmt, 1);
@@ -280,4 +293,35 @@ void print_num(fmt_callback_t out, void *data, unsigned long u, int base, int ne
 	}
 
 	out(data, buf, length);
+}
+
+void print_positon(fmt_callback_t out, void *data, long u, long u2, int base, int length,
+	       int ladjust, char padc, int upcase) {
+	long z = (u + u2) * (u - u2);
+	z = z < 0 ? -z : z;
+
+	out(data, '(', 1);
+	int neg_flag = 0;
+	if (u < 0) {
+		neg_flag = 1;
+		u = -u;
+	}
+	print_num(out, data, u, 10, neg_flag, length, ladjust, padc, upcase);
+	out(data, ',', 1);
+
+	neg_flag = 0;
+	if (u2 < 0) {
+		neg_flag = 1;
+		u2 = -u2;
+	}
+	print_num(out, data, u2, 10, neg_flag, length, ladjust, padc, upcase);
+	out(data, ',', 1);
+
+	neg_flag = 0;
+	if (z < 0) {
+		neg_flag = 1;
+		z = -z;
+	}
+	print_num(out, data, z, 10, neg_flag, length, ladjust, padc, upcase);
+	out(data, ')', 1);
 }
