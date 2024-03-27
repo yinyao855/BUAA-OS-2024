@@ -209,10 +209,10 @@ int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
 					in(data, &ch, 1);
 				}
 				int num = 0;
-				while (( (ch >= '0' && ch <= '9') || ( ch >= 'a' && ch <= 'f') )&& (ch != ' ') && (ch != '\t') && (ch != '\n')){
+				while ( (ch != ' ') && (ch != '\t') && (ch != '\n')){
 					if (ch >= '0' && ch <= '9'){
 						num = 16 *num + ch - '0';
-					}else{
+					}else if (ch >= 'a' && ch <= 'f'){
 						num = 16 *num + ch - 'a';
 					}
 					in(data, &ch, 1);
