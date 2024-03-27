@@ -300,14 +300,18 @@ void print_positon(fmt_callback_t out, void *data, long u, long u2, int base, in
 	long z = (u + u2) * (u - u2);
 	z = z < 0 ? -z : z;
 
-	out(data, '(', 1);
+	const char left = '(';
+	const char right = ')';
+	const char douhao = ',';
+
+	out(data, &left, 1);
 	int neg_flag = 0;
 	if (u < 0) {
 		neg_flag = 1;
 		u = -u;
 	}
 	print_num(out, data, u, 10, neg_flag, length, ladjust, padc, upcase);
-	out(data, ',', 1);
+	out(data, &douhao, 1);
 
 	neg_flag = 0;
 	if (u2 < 0) {
@@ -315,7 +319,7 @@ void print_positon(fmt_callback_t out, void *data, long u, long u2, int base, in
 		u2 = -u2;
 	}
 	print_num(out, data, u2, 10, neg_flag, length, ladjust, padc, upcase);
-	out(data, ',', 1);
+	out(data, &douhao, 1);
 
 	neg_flag = 0;
 	if (z < 0) {
@@ -323,5 +327,5 @@ void print_positon(fmt_callback_t out, void *data, long u, long u2, int base, in
 		z = -z;
 	}
 	print_num(out, data, z, 10, neg_flag, length, ladjust, padc, upcase);
-	out(data, ')', 1);
+	out(data, &right, 1);
 }
