@@ -199,7 +199,7 @@ int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
 				break;
 			case 'x': // 十六进制
 				// Lab 1-Extra: Your code here. (3/5)
-				ip = (int *)va_arg(ap, int *);
+				/*ip = (int *)va_arg(ap, int *);
 				int flag = 0;
 				if (ch == '-'){
 					flag = 1;
@@ -218,7 +218,7 @@ int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
 					in(data, &ch, 1);
 				}
 				if (flag) {num = -num;}
-				*ip = num;
+				*ip = num;*/
 				break;
 			case 'c':
 				// Lab 1-Extra: Your code here. (4/5)
