@@ -180,6 +180,22 @@ int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
 			switch (*fmt) {
 			case 'd': // 十进制
 				// Lab 1-Extra: Your code here. (2/5)
+				ip = (int *)va_arg(ap, int *);
+				int flag = 0;
+				if (ch == '-'){
+					flag = 1;
+					in(data, &ch, 1);
+				}
+				while ( ch == '0'){
+					in(data, &ch, 1);
+				}
+				int num = 0;
+				while ( ch >= '0' && ch <= '9' && ch != ' ' && ch != '\t' && ch != '\n'){
+					num = 10 *num + ch - '0';
+					in(data, &ch, 1);
+				}
+				if (flag) {num = -num;}
+				*ip = num;
 				break;
 			case 'x': // 十六进制
 				// Lab 1-Extra: Your code here. (3/5)
