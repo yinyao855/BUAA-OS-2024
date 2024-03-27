@@ -199,6 +199,26 @@ int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
 				break;
 			case 'x': // 十六进制
 				// Lab 1-Extra: Your code here. (3/5)
+				ip = (int *)va_arg(ap, int *);
+				int flag = 0;
+				if (ch == '-'){
+					flag = 1;
+					in(data, &ch, 1);
+				}
+				while ( ch == '0'){
+					in(data, &ch, 1);
+				}
+				int num = 0;
+				while ( (ch >= '0' && ch <= '9') || ( ch >= 'a' && ch <= 'f') && (ch != ' ') && (ch != '\t') && (ch != '\n')){
+					if (ch >= '0' && ch <= '9'){
+						num = 16 *num + ch - '0';
+					}else{
+						num = 16 *num + ch - 'a';
+					}
+					in(data, &ch, 1);
+				}
+				if (flag) {num = -num;}
+				*ip = num;
 				break;
 			case 'c':
 				// Lab 1-Extra: Your code here. (4/5)
