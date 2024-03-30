@@ -26,7 +26,7 @@ void mips_detect_memory(u_int _memsize) {
 
 	/* Step 2: Calculate the corresponding 'npage' value. */
 	/* Exercise 2.1: Your code here. */
-	npage = memsize / 4096;
+	npage = memsize / PAGE_SIZE;
 
 	printk("Memory size: %lu KiB, number of pages: %lu\n", memsize / 1024, npage);
 }
@@ -102,17 +102,16 @@ void page_init(void) {
 
 	/* Step 3: Mark all memory below `freemem` as used (set `pp_ref` to 1) */
 	/* Exercise 2.3: Your code here. (3/4) */
-	struct Page *tmp = pages;
-	for (tmp;(u_long)tmp < freemem; tmp++){
-		tmp -> pp_ref = 1;
+	u_long num = (freemem - (u_long)pages) / PAGE_SIZE;
+	for (u_long i = 0; i < num; i++) {
+		pages[i].pp_ref = 1;
 	}
 
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
-	u_long longend = (u_long)pages + npage * sizeof(struct Page);
-	for (tmp;(u_long)tmp < longend; tmp++){
-		tmp -> pp_ref = 0;
-		LIST_INSERT_HEAD(&page_free_list, tmp, pp_link);
+	for (u_long i = num; i < npage; i++) {
+		pages[i].pp_ref = 0;
+		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
 	}
 }
 
@@ -145,7 +144,7 @@ int page_alloc(struct Page **new) {
 	/* Step 2: Initialize this page with zero.
 	 * Hint: use `memset`. */
 	/* Exercise 2.4: Your code here. (2/2) */
-	memset((void*)(pp), 0, 4096);
+	memset((void*)(page2kva(pp)), 0, PAGE_SIZE);
 
 	*new = pp;
 	return 0;
