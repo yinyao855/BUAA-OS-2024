@@ -546,7 +546,10 @@ void buddy_init() {
 
 int buddy_alloc(u_int size, struct Page **new) {
 	/* Your Code Here (1/2) */
-	u_int space = ROUND(size, 2);
+	u_int space = 1;
+	while (space < size){
+		space = space *2;
+	}
 	struct Page *pp;
 	if (space <= 4096){
 		//分配4kb
@@ -561,8 +564,8 @@ int buddy_alloc(u_int size, struct Page **new) {
 			}else{
 				pp = LIST_FIRST(&buddy_free_list[1]);
 				*new = pp;
-				LIST_INSERT_HEAD(&buddy_free_list[0],pp+1,pp_link);
 				LIST_REMOVE(pp, pp_link);
+				LIST_INSERT_HEAD(&buddy_free_list[0],pp+1,pp_link);
 				return 1;
 			}
 		}
