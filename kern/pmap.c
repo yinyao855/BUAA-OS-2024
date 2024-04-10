@@ -606,7 +606,7 @@ void buddy_free(struct Page *pp, int npp) {
 				LIST_INSERT_HEAD(&buddy_free_list[1],va,pp_link);
 			}
 		}else{
-			LIST_INSERT_HEAD(&buddy_free_list[0],va,pp_link);
+			LIST_INSERT_HEAD(&buddy_free_list[0],pp,pp_link);
 		}
 	}
 }
