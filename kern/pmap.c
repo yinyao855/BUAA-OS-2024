@@ -4,6 +4,7 @@
 #include <mmu.h>
 #include <pmap.h>
 #include <printk.h>
+#include <buddy.h>
 
 /* These variables are set by mips_detect_memory(ram_low_size); */
 static u_long memsize; /* Maximum physical address */
@@ -525,4 +526,84 @@ void page_check(void) {
 	page_free(pa2page(PADDR(boot_pgdir)));
 
 	printk("page_check() succeeded!\n");
+}
+
+
+struct Page_list buddy_free_list[2];
+
+void buddy_init() {
+	LIST_INIT(&buddy_free_list[0]);
+	LIST_INIT(&buddy_free_list[1]);
+	for (int i = BUDDY_PAGE_BASE; i < BUDDY_PAGE_END; i += PAGE_SIZE) {
+		struct Page *pp = pa2page(i);
+		LIST_REMOVE(pp, pp_link);
+	}
+	for (int i = BUDDY_PAGE_BASE; i < BUDDY_PAGE_END; i += 2 * PAGE_SIZE) {
+		struct Page *pp = pa2page(i);
+		LIST_INSERT_HEAD(&buddy_free_list[1], pp, pp_link);
+	}
+}
+
+int buddy_alloc(u_int size, struct Page **new) {
+	/* Your Code Here (1/2) */
+	u_int space = ROUND(size, 2);
+	struct Page *pp;
+	if (space <= 4096){
+		//分配4kb
+		if (!LIST_EMPTY(&buddy_free_list[0])){
+			pp = LIST_FIRST(&buddy_free_list[0]);
+			LIST_REMOVE(pp, pp_link);
+			*new = pp;
+			return 1;
+		}else{
+			if (LIST_EMPTY(&buddy_free_list[1])){
+				return -E_NO_MEM;
+			}else{
+				pp = LIST_FIRST(&buddy_free_list[1]);
+				*new = pp;
+				LIST_INSERT_HEAD(&buddy_free_list[0],pp+1,pp_link);
+				LIST_REMOVE(pp, pp_link);
+				return 1;
+			}
+		}
+	}
+	else{
+		//分配8kb
+		if (LIST_EMPTY(&buddy_free_list[1])){
+				return -E_NO_MEM;
+			}else{
+				pp = LIST_FIRST(&buddy_free_list[1]);
+				*new = pp;
+				LIST_REMOVE(pp, pp_link);
+				return 2;
+			}
+	}
+}
+
+void buddy_free(struct Page *pp, int npp) {
+	/* Your Code Here (2/2) */
+	if (npp ==2){
+		LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
+	}else{
+		struct Page *va;
+		int flag = 0;
+		LIST_FOREACH(va,&buddy_free_list[0],pp_link)
+		{
+			if ((va==pp+1)||(va==pp-1)){
+				flag =1;
+				break;
+			}
+		}
+		if (flag){
+			if (va==pp+1){
+				LIST_REMOVE(va,pp_link);
+				LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
+			}else if (va==pp-1){
+				LIST_REMOVE(va,pp_link);
+				LIST_INSERT_HEAD(&buddy_free_list[1],va,pp_link);
+			}
+		}else{
+			LIST_INSERT_HEAD(&buddy_free_list[0],va,pp_link);
+		}
+	}
 }
