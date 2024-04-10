@@ -102,7 +102,7 @@ void page_init(void) {
 
 	/* Step 3: Mark all memory below `freemem` as used (set `pp_ref` to 1) */
 	/* Exercise 2.3: Your code here. (3/4) */
-	u_long num = (freemem - (u_long)pages) / PAGE_SIZE;
+	u_long num = PADDR(freemem) / PAGE_SIZE;
 	for (u_long i = 0; i < num; i++) {
 		pages[i].pp_ref = 1;
 	}
