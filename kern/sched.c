@@ -35,6 +35,7 @@ void schedule(int yield) {
          *   'TAILQ_FIRST', 'TAILQ_REMOVE', 'TAILQ_INSERT_TAIL'
          */
         /* Exercise 3.12: Your code here. */
+	count--;
         if (yield || count <= 0 || e == NULL || e->env_status != ENV_RUNNABLE) {
             if (TAILQ_EMPTY(&env_sched_list)) {
                 panic("no runnable env");
@@ -53,6 +54,6 @@ void schedule(int yield) {
 
             count = e->env_pri;
         }
-        count--;
+        
         env_run(e);
 }
