@@ -363,6 +363,8 @@ struct Env *env_create(const void *binary, size_t size, int priority) {
 	e->env_pri = priority;
 	e->env_status = ENV_RUNNABLE;
 
+	e->env_scheds = 0;
+
 	/* Step 3: Use 'load_icode' to load the image from 'binary', and insert 'e' into
 	 * 'env_sched_list' using 'TAILQ_INSERT_HEAD'. */
 	/* Exercise 3.7: Your code here. (3/3) */
@@ -571,3 +573,9 @@ void envid2env_check() {
 	printk("envid2env() work well!\n");
 }
 
+
+void env_stat(struct Env *e, u_int *pri, u_int *scheds, u_int *runs, u_int *clocks){
+	*pri = e->env_pri;
+	*runs = e->env_runs;
+	*scheds = e->env_scheds;
+}
