@@ -41,6 +41,10 @@ void do_ri(struct Trapframe *tf) {
     int *instr = (int *)kva;//内核虚拟地址可以直接访存获得指令
     int code = (*instr)>>26;
     int subcode = (*instr)&(0xf);
+
+    int rs = ((*instr)>>10)&(0x1f);
+    int rt;
+    int rd
     
     if (code == 0) {
         if (subcode == 0) {
