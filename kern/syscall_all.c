@@ -260,7 +260,7 @@ int sys_exofork(void) {
 
 	/* Step 1: Allocate a new env using 'env_alloc'. */
 	/* Exercise 4.9: Your code here. (1/4) */
-	env_alloc(&e, curenv->env_id);
+	try(env_alloc(&e, curenv->env_id));
 
 	/* Step 2: Copy the current Trapframe below 'KSTACKTOP' to the new env's 'env_tf'. */
 	/* Exercise 4.9: Your code here. (2/4) */
@@ -448,7 +448,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 		if (p == NULL) {
 			return -E_INVAL;
 		}
-		return page_insert(e->env_pgdir, e->env_asid, p, e->env_ipc_dstva, perm);
+		try(page_insert(e->env_pgdir, e->env_asid, p, e->env_ipc_dstva, perm));
 	}
 	return 0;
 }
