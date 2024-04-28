@@ -148,10 +148,7 @@ int sys_mem_alloc(u_int envid, u_int va, u_int perm) {
 	/* Step 2: Convert the envid to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Hint: **Always** validate the permission in syscalls! */
 	/* Exercise 4.4: Your code here. (2/3) */
-	int ret = envid2env(envid, &env, 1);
-	if (ret != 0) {
-		return -E_BAD_ENV;
-	}
+	try(envid2env(envid, &env, 1));
 
 	/* Step 3: Allocate a physical page using 'page_alloc'. */
 	/* Exercise 4.4: Your code here. (3/3) */
@@ -189,20 +186,16 @@ int sys_mem_map(u_int srcid, u_int srcva, u_int dstid, u_int dstva, u_int perm) 
 
 	/* Step 2: Convert the 'srcid' to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Exercise 4.5: Your code here. (2/4) */
-	if (envid2env(srcid, &srcenv, 1) != 0) {
-		return -E_BAD_ENV;
-	}
+	try(envid2env(srcid, &srcenv, 1));
 
 	/* Step 3: Convert the 'dstid' to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Exercise 4.5: Your code here. (3/4) */
-	if (envid2env(dstid, &dstenv, 1) != 0) {
-		return -E_BAD_ENV;
-	}
+	try(envid2env(dstid, &dstenv, 1));
 
 	/* Step 4: Find the physical page mapped at 'srcva' in the address space of 'srcid'. */
 	/* Return -E_INVAL if 'srcva' is not mapped. */
 	/* Exercise 4.5: Your code here. (4/4) */
-	pp = page_lookup(srcenv->env_pgdir, srcva, 0);
+	pp = page_lookup(srcenv->env_pgdir, srcva, NULL);
 	if (pp == NULL) {
 		return -E_INVAL;
 	}
@@ -232,9 +225,7 @@ int sys_mem_unmap(u_int envid, u_int va) {
 
 	/* Step 2: Convert the envid to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Exercise 4.6: Your code here. (2/2) */
-	if (envid2env(envid, &e, 1) != 0) {
-		return -E_BAD_ENV;
-	}
+	try(envid2env(envid, &e, 1));
 
 	/* Step 3: Unmap the physical page at 'va' in the address space of 'envid'. */
 	page_remove(e->env_pgdir, e->env_asid, va);
@@ -417,9 +408,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	/* This is the only syscall where the 'envid2env' should be used with 'checkperm' UNSET,
 	 * because the target env is not restricted to 'curenv''s children. */
 	/* Exercise 4.8: Your code here. (5/8) */
-	if (envid2env(envid, &e, 0) != 0) {
-		return -E_BAD_ENV;
-	}
+	try(envid2env(envid, &e, 0));
 
 	/* Step 3: Check if the target is waiting for a message. */
 	/* Exercise 4.8: Your code here. (6/8) */
@@ -444,7 +433,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	/* Return -E_INVAL if 'srcva' is not zero and not mapped in 'curenv'. */
 	if (srcva != 0) {
 		/* Exercise 4.8: Your code here. (8/8) */
-		p = page_lookup(curenv->env_pgdir, srcva, 0);
+		p = page_lookup(curenv->env_pgdir, srcva, NULL);
 		if (p == NULL) {
 			return -E_INVAL;
 		}

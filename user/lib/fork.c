@@ -81,7 +81,7 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Step 1: Get the permission of the page. */
 	/* Hint: Use 'vpt' to find the page table entry. */
 	/* Exercise 4.10: Your code here. (1/2) */
-	addr = vpn * PAGE_SIZE;
+	addr = vpn << PGSHIFT;
 	perm = vpt[vpn] & 0xfff;	// 获取权限位
 
 	/* Step 2: If the page is writable, and not shared with children, and not marked as COW yet,
