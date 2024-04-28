@@ -95,9 +95,9 @@ static void duppage(u_int envid, u_int vpn) {
 		perm |= PTE_COW;
 		flag = 1;
 	} // 更改权限为写时复制
-	syscall_mem_map(0, addr, envid, addr, perm);	// 将父进程的页映射到子进程
+	syscall_mem_map(0, (void *)addr, envid, (void *)addr, perm);	// 将父进程的页映射到子进程
 	if (flag){
-		syscall_mem_map(0, addr, 0, addr, perm);	
+		syscall_mem_map(0, (void *)addr, 0, (void *)addr, perm);	
 	}
 }
 
