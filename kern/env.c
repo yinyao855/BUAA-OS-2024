@@ -118,8 +118,7 @@ int envid2env(u_int envid, struct Env **penv, int checkperm) {
 		*penv = curenv;
 		return 0;
 	} else {
-		// e = &envs[ENVX(envid)];
-		e = envs + ENVX(envid);
+		e = &envs[ENVX(envid)];
 	}
 
 	if (e->env_status == ENV_FREE || e->env_id != envid) {
