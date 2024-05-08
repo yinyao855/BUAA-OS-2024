@@ -501,10 +501,13 @@ int sys_msg_recv(u_int dstva) {
 	/* Your Code Here (2/3) */
 	m = TAILQ_FIRST(&curenv->env_msg_list);
 	p = m->msg_page;
-	if (dstva != 0){
-		try(page_insert(curenv->env_pgdir, curenv->env_asid, p, dstva, m->msg_perm));
+	if (p !=NULL){
+		if (dstva != 0){
+			try(page_insert(curenv->env_pgdir, curenv->env_asid, p, dstva, m->msg_perm));
+		}
 		page_decref(p);
 	}
+	
 	curenv->env_msg_value = m->msg_value;
 	curenv->env_msg_from = m->msg_from;
 	curenv->env_msg_perm = m->msg_perm;
