@@ -465,6 +465,26 @@ int sys_msg_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	}
 
 	/* Your Code Here (1/3) */
+	m = TAILQ_FIRST(&msg_free_list);
+
+	m->msg_tier++;
+	m->msg_status = MSG_SENT;
+	m->msg_value = value;
+	m->msg_from = envid;
+	m->msg_perm = PTE_V | perm;
+	
+	if (srcva != 0) {
+		p = page_lookup(curenv->env_pgdir, srcva, NULL);
+		if (p == NULL) {
+			return -E_INVAL;
+		}
+		p->pp_ref++;
+		m->msg_page = p;
+	}
+
+	TAILQ_INSERT_TAIL(&e->env_msg_list, m, msg_link);
+	TAILQ_REMOVE(&msg_free_list, m, msg_link);
+	return msg2id(m);
 }
 
 int sys_msg_recv(u_int dstva) {
@@ -479,12 +499,36 @@ int sys_msg_recv(u_int dstva) {
 	}
 
 	/* Your Code Here (2/3) */
+	m = TAILQ_FIRST(&curenv->env_msg_list);
+	p = m->msg_page;
+	if (dstva != 0){
+		try(page_insert(curenv->env_pgdir, curenv->env_asid, p, dstva, m->msg_perm));
+		p->pp_ref--;
+	}
+	curenv->env_msg_value = m->msg_value;
+	curenv->env_msg_from = m->msg_from;
+	curenv->env_msg_perm = m->msg_perm;
+
+	m->msg_status = MSG_RECV;
+	TAILQ_INSERT_TAIL(&msg_free_list, m, msg_link);
+	TAILQ_REMOVE(&curenv->env_msg_list, m ,msg_link);
+	return 0;
 }
 
 int sys_msg_status(u_int msgid) {
 	struct Msg *m;
 
 	/* Your Code Here (3/3) */
+	m = &msgs[MSGX(msgid)];
+	if (msg2id(m)==msg2id){
+		return m->msg_status;
+	}
+	else if (msg2id(m)>msg2id){
+		return MSG_RECV;
+	}
+	else{
+		return -E_INVAL;
+	}
 }
 
 
@@ -612,4 +656,5 @@ void do_syscall(struct Trapframe *tf) {
 	/* Exercise 4.2: Your code here. (4/4) */
 	tf->regs[2] = func(arg1, arg2, arg3, arg4, arg5);
 }
+
 
