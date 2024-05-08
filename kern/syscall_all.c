@@ -475,9 +475,9 @@ int sys_msg_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	
 	if (srcva != 0) {
 		p = page_lookup(curenv->env_pgdir, srcva, NULL);
-		if (p == NULL) {
-			return -E_INVAL;
-		}
+		// if (p == NULL) {
+		// 	return -E_INVAL;
+		// }
 		p->pp_ref++;
 		m->msg_page = p;
 	}
