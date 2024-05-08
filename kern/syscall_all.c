@@ -470,7 +470,7 @@ int sys_msg_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	m->msg_tier++;
 	m->msg_status = MSG_SENT;
 	m->msg_value = value;
-	m->msg_from = envid;
+	m->msg_from = curenv->env_id;
 	m->msg_perm = PTE_V | perm;
 	
 	if (srcva != 0) {
@@ -503,7 +503,7 @@ int sys_msg_recv(u_int dstva) {
 	p = m->msg_page;
 	if (dstva != 0){
 		try(page_insert(curenv->env_pgdir, curenv->env_asid, p, dstva, m->msg_perm));
-		p->pp_ref--;
+		page_decref(p);
 	}
 	curenv->env_msg_value = m->msg_value;
 	curenv->env_msg_from = m->msg_from;
@@ -520,10 +520,10 @@ int sys_msg_status(u_int msgid) {
 
 	/* Your Code Here (3/3) */
 	m = &msgs[MSGX(msgid)];
-	if (msg2id(m)==msg2id){
+	if (msg2id(m)==msgid){
 		return m->msg_status;
 	}
-	else if (msg2id(m)>msg2id){
+	else if (msg2id(m)>msgid){
 		return MSG_RECV;
 	}
 	else{
