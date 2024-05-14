@@ -215,6 +215,12 @@ struct File *create_file(struct File *dirf) {
 		// directly from 'f_direct'. Otherwise, access the indirect block on 'disk' and get
 		// the 'bno' at the index.
 		/* Exercise 5.5: Your code here. (1/3) */
+		if (i < NDIRECT){
+			bno = dirf->f_direct[i];
+		}
+		else{
+			bno = ((uint_32 *)disk[dirf->f_indirect].data)[i];
+		}
 
 		// Get the directory block using the block number.
 		struct File *blk = (struct File *)(disk[bno].data);
@@ -224,7 +230,7 @@ struct File *create_file(struct File *dirf) {
 			// If the first byte of the file name is null, the 'File' is unused.
 			// Return a pointer to the unused 'File'.
 			/* Exercise 5.5: Your code here. (2/3) */
-
+			if (f->f_name[0] == NULL) {return f;}
 		}
 	}
 
@@ -232,7 +238,7 @@ struct File *create_file(struct File *dirf) {
 	// and return a pointer to the new block on 'disk'.
 	/* Exercise 5.5: Your code here. (3/3) */
 
-	return NULL;
+	return (struct File *)(disk[make_link_block(dirf, nblk)].data);
 }
 
 // Write file to disk under specified dir.
