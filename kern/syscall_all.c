@@ -491,8 +491,8 @@ int sys_write_dev(u_int va, u_int pa, u_int len) {
 		return -E_INVAL;
 	}
 	
-	if ((0x180003f8 <= pa && pa + len < 0x18000418) ||
-        (0x180001f0 <= pa && pa + len < 0x180001f8)) {
+	if ((0x180003f8 <= pa && pa + len <= 0x18000418) ||
+        (0x180001f0 <= pa && pa + len <= 0x180001f8)) {
         memcpy((void *)(pa | KSEG1), (void *)va, len);
         return 0;
     }
@@ -525,8 +525,8 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 		return -E_INVAL;
 	}
 	
-	if ((0x180003f8 <= pa && pa + len < 0x18000418) ||
-        (0x180001f0 <= pa && pa + len < 0x180001f8)) {
+	if ((0x180003f8 <= pa && pa + len <= 0x18000418) ||
+        (0x180001f0 <= pa && pa + len <= 0x180001f8)) {
         memcpy((void *)va, (void *)(pa | KSEG1), len);
         return 0;
     }

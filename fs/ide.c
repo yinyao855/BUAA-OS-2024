@@ -142,7 +142,7 @@ void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
 
 		// Step 6: Write the working mode to STATUS register
 		/* Exercise 5.3: Your code here. (8/9) */
-		temp = MALTA_IDE_CMD_PIO_READ;
+		temp = MALTA_IDE_CMD_PIO_WRITE;
 		panic_on(syscall_write_dev(&temp, MALTA_IDE_STATUS, 1));
 
 		// Step 7: Wait until the IDE is ready
