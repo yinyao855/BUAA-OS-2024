@@ -450,6 +450,11 @@ int sys_cgetc(void) {
 	return ch;
 }
 
+// sys_clone系统调用
+int sys_clone(){
+	
+}
+
 /* Overview:
  *  This function is used to write data at 'va' with length 'len' to a device physical address
  *  'pa'. Remember to check the validity of 'va' and 'pa' (see Hint below);
@@ -527,6 +532,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_clone] = sys_clone,
 };
 
 /* Overview:
