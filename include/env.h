@@ -58,6 +58,8 @@ void env_run(struct Env *e) __attribute__((noreturn));
 void env_check(void);
 void envid2env_check(void);
 
+int env_clone(struct Env **new, u_int parent_id);
+
 #define ENV_CREATE_PRIORITY(x, y)                                                                  \
 	({                                                                                         \
 		extern u_char binary_##x##_start[];                                                \
