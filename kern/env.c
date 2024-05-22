@@ -300,9 +300,9 @@ int env_clone(struct Env **new, u_int parent_id){
 	}
 	e = LIST_FIRST(&env_free_list);
 
-	struct Env *father = envs[ENVX(parent_id)];
+	struct Env *father = envs + ENVX(parent_id);
 	int *num = (int *)(father->env_pgdir + PDX(KSEG1));
-	*num++;
+	(*num)++;
 	e->env_pgdir = father->env_pgdir;
 
 	/* Step 3: Initialize these fields for the new Env with appropriate values:
