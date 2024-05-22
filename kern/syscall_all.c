@@ -451,8 +451,20 @@ int sys_cgetc(void) {
 }
 
 // sys_clone系统调用
-int sys_clone(){
-	
+int sys_clone(void *func, void *child_stack){
+	int *num = (int *)(father->env_pgdir + PDX(KSEG1));
+	if (*num >= 64){
+		return -E_ACT_ENV_NUM_EXCEED;
+	}
+
+	struct Env *e;
+
+	try(env_clone(&e, curenv->envid));
+
+	e->env_tf = *((struct Trapframe *)KSTACKTOP - 1);
+
+	e->status = ENV_RUNNABLE;
+	TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
 }
 
 /* Overview:
