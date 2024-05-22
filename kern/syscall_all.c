@@ -452,21 +452,21 @@ int sys_cgetc(void) {
 
 // sys_clone系统调用
 int sys_clone(void *func, void *child_stack){
-	int *num = (int *)(father->env_pgdir + PDX(KSEG1));
+	int *num = (int *)(curenv->env_pgdir + PDX(KSEG1));
 	if (*num >= 64){
 		return -E_ACT_ENV_NUM_EXCEED;
 	}
 
 	struct Env *e;
 
-	try(env_clone(&e, curenv->envid));
+	try(env_clone(&e, curenv->env_id));
 
 	e->env_tf = *((struct Trapframe *)KSTACKTOP - 1);
 
 	e->env_tf.cp0_epc = *func;
 	// e->env_tf
 
-	e->status = ENV_RUNNABLE;
+	e->env_status = ENV_RUNNABLE;
 	TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
 }
 
