@@ -124,6 +124,9 @@ int fork(void) {
 	// Hint: 'env' should always point to the current env itself, so we should fix it to the
 	// correct value.
 	child = syscall_exofork();
+
+	strace_recv_child[child] = 0;
+
 	if (child == 0) {
 		env = envs + ENVX(syscall_getenvid());
 		return 0;
