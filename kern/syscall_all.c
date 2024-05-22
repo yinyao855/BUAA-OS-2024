@@ -463,7 +463,7 @@ int sys_clone(void *func, void *child_stack){
 
 	e->env_tf = *((struct Trapframe *)KSTACKTOP - 1);
 
-	e->env_tf.cp0_epc = *func;
+	e->env_tf.cp0_epc = func;
 	// e->env_tf
 
 	e->env_status = ENV_RUNNABLE;
