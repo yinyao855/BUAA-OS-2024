@@ -137,3 +137,8 @@ int fsipc_remove(const char *path) {
 int fsipc_sync(void) {
 	return fsipc(FSREQ_SYNC, fsipcbuf, 0, 0);
 }
+
+
+int fsipc_chmod(const char *, u_int, int){
+	
+}
