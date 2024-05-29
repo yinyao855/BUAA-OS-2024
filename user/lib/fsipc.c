@@ -140,6 +140,12 @@ int fsipc_sync(void) {
 
 int fsipc_copy(const char *src_path, const char *dst_path) {
    // Lab 5-2-Exam: Your code here. (1/6)
+   if (strlen(src_path) >= MAXPATHLEN || strlen(src_path) == 0) {
+		return -E_BAD_PATH;
+	}
+	if (strlen(dst_path) >= MAXPATHLEN || strlen(dst_path) == 0) {
+		return -E_BAD_PATH;
+	}
    struct Fsreq_copy *req;
    req = (struct Fsreq_copy *)fsipcbuf;
    strcpy(req->req_src_path, src_path);
