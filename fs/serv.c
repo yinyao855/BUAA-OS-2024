@@ -341,7 +341,28 @@ void serve_sync(u_int envid) {
 }
 
 void serve_chmod(char *path, u_int mode, int type){
+	int r;
+	struct File *f;
+	if ((r = file_open(path, &f)) < 0){
+		ipc_send(envid, r, 0, 0);
+		return;
+	}
 
+	int type = f->f_type;
+	if (type == 0){
+		f->f_mode = mode;
+	}
+	else if (type == 1)
+	{
+		f->f_mode |= mode;
+	}
+	else if (type == 2)
+	{
+		f->f_mode &= (!mode);
+	}
+	
+	file_close(f);
+	ipc_send(envid, 0, 0, 0);
 }
 
 /*
