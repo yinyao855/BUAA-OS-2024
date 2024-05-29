@@ -679,7 +679,7 @@ int file_create(char *path, struct File **file) {
 		return r;
 	}
 
-	if (!(dir->f_mode & FMODE_X)){
+	if (!(dir->f_mode & FMODE_W)){
 		return -E_PERM_DENY;
 	}
 
@@ -804,7 +804,7 @@ int file_remove(char *path) {
 		return r;
 	}
 
-	if (!(f->f_mode & FMODE_X)){
+	if (!(f->f_mode & FMODE_W)){
 		return -E_PERM_DENY;
 	}
 
