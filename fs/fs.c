@@ -680,6 +680,7 @@ int file_create(char *path, struct File **file) {
 	}
 
 	strcpy(f->f_name, name);
+	f->f_mode = FMODE_ALL;
 	*file = f;
 	return 0;
 }

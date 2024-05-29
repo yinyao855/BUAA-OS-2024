@@ -119,7 +119,7 @@ int remove(const char *path);
 int ftruncate(int fd, u_int size);
 int sync(void);
 
-int fsipc_chmod(const char *, u_int, int);
+int fsipc_chmod(const char *path, u_int mode, int type);
 int chmod(const char *path, u_int mode, int type);
 
 #define user_assert(x)                                                                             \
