@@ -141,7 +141,7 @@ int fsipc_sync(void) {
 int fsipc_copy(const char *src_path, const char *dst_path) {
    // Lab 5-2-Exam: Your code here. (1/6)
    struct Fsreq_copy *req;
-   req = (struct Fsreq_dirty *)fsipcbuf;
+   req = (struct Fsreq_copy *)fsipcbuf;
    strcpy(req->req_src_path, src_path);
    strcpy(req->req_dst_path, dst_path);
    return fsipc(FSREQ_COPY, req, 0, 0);
