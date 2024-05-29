@@ -365,7 +365,7 @@ void serve_chmod(u_int envid, struct Fsreq_chmod *rq){
 	{
 		f->f_mode &= (!mode);
 	}
-	flie_flush(f);
+	file_flush(f);
 	file_close(f);
 	ipc_send(envid, 0, 0, 0);
 }
