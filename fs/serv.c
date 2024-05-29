@@ -340,13 +340,19 @@ void serve_sync(u_int envid) {
 	ipc_send(envid, 0, 0, 0);
 }
 
-void serve_chmod(u_int envid, char *path, u_int mode, int type){
+void serve_chmod(u_int envid, struct Fsreq_chmod *rq){
+	u_int mode;
+	int type;
+
 	int r;
 	struct File *f;
-	if ((r = file_open(path, &f)) < 0){
+	if ((r = file_open(rq->req_path, &f)) < 0){
 		ipc_send(envid, r, 0, 0);
 		return;
 	}
+
+	mode = rq->req_mode;
+	type = rq->req_type;
 
 	if (type == 0){
 		f->f_mode = mode;
