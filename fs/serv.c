@@ -363,7 +363,7 @@ void serve_chmod(u_int envid, struct Fsreq_chmod *rq){
 	}
 	else if (type == 2)
 	{
-		f->f_mode &= (!mode);
+		f->f_mode &= (~mode);
 	}
 	file_flush(f);
 	file_close(f);
