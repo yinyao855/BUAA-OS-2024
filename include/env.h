@@ -5,6 +5,7 @@
 #include <queue.h>
 #include <trap.h>
 #include <types.h>
+#include <sig.h>
 
 #define LOG2NENV 10
 #define NENV (1 << LOG2NENV)
@@ -39,6 +40,14 @@ struct Env {
 
 	// Lab 6 scheduler counts
 	u_int env_runs; // number of times we've been env_run'ed
+
+	// Challenge sigaction
+	u_int env_handlers[33]; // 信号处理函数
+    sigset_t env_sa_mask; // 信号掩码
+	struct sigstack *env_sig_stack;
+	u_int env_sig_entry;
+	u_int env_sig_flag;
+	u_int env_protect[256];
 };
 
 LIST_HEAD(Env_list, Env);

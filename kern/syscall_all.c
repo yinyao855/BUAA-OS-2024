@@ -4,6 +4,7 @@
 #include <pmap.h>
 #include <printk.h>
 #include <sched.h>
+#include <sig.h>
 #include <syscall.h>
 
 extern struct Env *curenv;
@@ -534,6 +535,66 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return -E_INVAL;
 }
 
+int sys_get_sig_act(u_int envid, int signum, struct sigaction *oldact) {
+	struct Env *e;
+	if (!isvalid(signum)){
+        return -1;
+    }
+
+	try(envid2env(envid, &e, 1));
+
+	if (oldact != NULL) {
+		oldact->sa_handler = e->env_handlers[signum]; //这个地方赋值不清楚对不对
+		oldact->sa_mask = e->env_sa_mask;
+	}
+	return 0;
+}
+
+// 设置信号处理函数
+int sys_set_sig_act(u_int envid, int signum, struct sigaction *act) {
+	struct Env *e;
+	if (!isvalid(signum)){
+        return -1;
+    }
+
+	try(envid2env(envid, &e, 1));
+
+	e->env_handlers[signum] = (u_int)act->sa_handler;
+	e->env_sa_mask = act->sa_mask;
+	return 0;
+}
+
+int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
+	struct Env *env;
+    try(envid2env(envid, &env, 1));
+	if (oldset != NULL) { 
+    //当oldset不为NULL时，还需将原有的信号掩码放在oldset指定的地址空间中
+        oldset->sig = env->env_sa_mask.sig;
+    }
+	switch (how) {
+    	case SIG_BLOCK: //将set参数中指定的信号添加到当前进程的信号掩码中
+			env->env_sa_mask.sig |= set->sig;
+        	break;
+   		case SIG_UNBLOCK: //将set参数中指定的信号从当前进程的信号掩码中删除
+        	env->env_sa_mask.sig &= (~set->sig);
+        	break;
+    	case SIG_SETMASK: //将当前进程的信号掩码设置为set参数中指定的信号集
+         	env->env_sa_mask.sig = set->sig;
+        	break;    
+    	default:
+        	break;
+    }
+	return 0;
+}
+
+int sys_ukill(u_int envid, int sig) {
+	struct Env *e;
+	if (!isvalid(sig)){
+        return -1;
+    }
+	return 0;
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -553,6 +614,10 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_get_sig_act] = sys_get_sig_act,
+	[SYS_set_sig_act] = sys_set_sig_act,
+	[SYS_set_sig_set] = sys_set_sig_set,
+	[SYS_ukill] = sys_ukill,
 };
 
 /* Overview:

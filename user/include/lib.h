@@ -3,6 +3,7 @@
 #include <args.h>
 #include <env.h>
 #include <fd.h>
+#include <sig.h>
 #include <mmu.h>
 #include <pmap.h>
 #include <syscall.h>
@@ -68,6 +69,11 @@ int syscall_ipc_recv(void *dstva);
 int syscall_cgetc(void);
 int syscall_write_dev(void *va, u_int dev, u_int len);
 int syscall_read_dev(void *va, u_int dev, u_int len);
+
+int syscall_get_sig_act(u_int envid, int signum, struct sigaction *oldact);
+int syscall_set_sig_act(u_int envid, int signum, struct sigaction *act);
+int syscall_set_sig_set(u_int envid, int how, sigset_t *newset, sigset_t *oldset);
+int syscall_kill(u_int envid, int sig);
 
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
