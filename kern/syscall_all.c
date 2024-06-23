@@ -690,6 +690,7 @@ int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 		return 0;
 	}
 	flag = 0;
+	p = head, q = head->next;
 	while (q != NULL)
 	{
 		if (((1 << (q->sig -1)) & sa_mask.sig) == 0) {
