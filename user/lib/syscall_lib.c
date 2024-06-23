@@ -75,8 +75,19 @@ int syscall_read_dev(void *va, u_int dev, u_int size) {
 	return msyscall(SYS_read_dev, va, dev, size);
 }
 
-int syscall_get_sig_act(u_int envid, int signum, struct sigaction *oldact) {
-	return msyscall(SYS_get_sig_act, envid, signum, oldact);
+/*------------处理信号相关的系统调用-------------*/
+int syscall_set_sig_trapframe(u_int envid, struct Trapframe *tf)
+{
+    return msyscall(SYS_set_sig_trapframe, envid, tf);
+}
+
+int syscall_set_sig_entry(u_int envid, void (*func)(struct Trapframe *, void (*)(int), int,  int)) {
+	return msyscall(SYS_set_sig_entry, envid, func);
+}
+
+int syscall_get_sig_act(u_int envid, int signum, struct sigaction *oldact)
+{
+    return msyscall(SYS_get_sig_act, envid, signum, oldact);
 }
 
 int syscall_set_sig_act(u_int envid, int signum, struct sigaction *act) {

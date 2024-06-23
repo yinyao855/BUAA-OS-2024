@@ -98,4 +98,51 @@ void do_tlb_mod(struct Trapframe *tf) {
 		panic("TLB Mod but no user handler registered");
 	}
 }
+
+void do_signal(struct Trapframe *tf) {
+	struct siglist *sig_list = curenv->env_sig_head;
+	// struct siglist *front = NULL;
+	// while (sig_list != NULL && getSig((&(curenv->env_sa_mask)), sig_list->sig) == 1) {
+    // 	//找到第一个可以需要现在处理的信号
+	// 	front = sig_list;
+	// 	sig_list = sig_list->next;
+	// }
+	if (sig_list == NULL) {
+		return;
+	}
+	int sig = 0;
+	getSig(sig_list, curenv->env_sa_mask, &sig);
+	// if (sig_list->sig != SIGSEGV) {
+	// 	return;
+	// }
+    
+	// if (front == NULL) {
+	// 	curenv->env_sig_head = sig_list->next;
+	// } else {
+	// 	front->next = sig_list->next;
+	// }
+	// sig_list->next = NULL;
+	
+	struct Trapframe tmp_tf = *tf;
+	if (tf->regs[29] < USTACKTOP || tf->regs[29] >= UXSTACKTOP) {
+		tf->regs[29] = UXSTACKTOP; // 将栈指针指向用户异常处理栈
+	}
+	tf->regs[29] -= sizeof(struct Trapframe); // 将当前的 Trapframe 压入异常处理栈
+	*(struct Trapframe *)tf->regs[29] = tmp_tf;
+	
+	if (curenv->env_sig_entry) {
+		tf->regs[4] = tf->regs[29];
+		tf->regs[5] = (unsigned int)(curenv->env_handlers[sig]);
+		tf->regs[6] = sig;
+		tf->regs[7] = curenv->env_id;
+		tf->regs[29] -= sizeof(tf->regs[4]);
+		tf->regs[29] -= sizeof(tf->regs[5]);
+		tf->regs[29] -= sizeof(tf->regs[6]);
+		tf->regs[29] -= sizeof(tf->regs[7]);
+        
+		tf->cp0_epc = curenv->env_sig_entry;
+	} else {
+		panic("sig but no user handler registered");
+	}
+}
 #endif

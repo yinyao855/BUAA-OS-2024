@@ -8,6 +8,7 @@
 #include <syscall.h>
 
 extern struct Env *curenv;
+static struct siglist SIGlist[4096];
 
 /* Overview:
  * 	This function is used to print a character on screen.
@@ -266,6 +267,12 @@ int sys_exofork(void) {
 	/* Exercise 4.9: Your code here. (4/4) */
 	e->env_status = ENV_NOT_RUNNABLE;
 	e->env_pri = curenv->env_pri;
+
+	for (u_int i = 1; i <= 32; i++) // 子进程继承父进程信号屏蔽集和处理函数
+	{
+		e->env_handlers[i] = curenv->env_handlers[i];
+		e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
+	}
 
 	return e->env_id;
 }
@@ -535,6 +542,30 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return -E_INVAL;
 }
 
+int sys_set_sig_trapframe(u_int envid, struct Trapframe *tf) {
+	if (is_illegal_va_range((u_long)tf, sizeof *tf)) {
+		return -E_INVAL;
+	}
+	struct Env *env;
+	try(envid2env(envid, &env, 1));
+	// env->env_sig_flag = 0;
+	if (env == curenv) {
+		*((struct Trapframe *)KSTACKTOP - 1) = *tf;
+		return tf->regs[2];
+	} else {
+		env->env_tf = *tf;
+		return 0;
+	}
+}
+
+int sys_set_sig_entry(u_int envid, u_int func) {
+	struct Env *env;
+	try(envid2env(envid, &env, 1));
+
+	env->env_sig_entry = func;
+	return 0;
+}
+
 int sys_get_sig_act(u_int envid, int signum, struct sigaction *oldact) {
 	struct Env *e;
 	if (!isvalid(signum)){
@@ -544,7 +575,7 @@ int sys_get_sig_act(u_int envid, int signum, struct sigaction *oldact) {
 	try(envid2env(envid, &e, 1));
 
 	if (oldact != NULL) {
-		oldact->sa_handler = e->env_handlers[signum]; //这个地方赋值不清楚对不对
+		oldact->sa_handler = (void *)e->env_handlers[signum];
 		oldact->sa_mask = e->env_sa_mask;
 	}
 	return 0;
@@ -588,10 +619,58 @@ int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
 }
 
 int sys_ukill(u_int envid, int sig) {
-	struct Env *e;
-	if (!isvalid(sig)){
+	struct Env *env;
+	if (!isvalid(sig)) {
         return -1;
     }
+	// 加入信号
+	try(envid2env(envid, &env, 1));
+	int i;
+	struct siglist *p = env->env_sig_head;
+	for (i = 0; i < 4096; i++)
+	{
+		if (SIGlist[i].sig == 0) { // 代表还没有分配
+			SIGlist[i].sig = sig;
+			SIGlist[i].next = NULL;
+			break;
+		}
+	}
+	// 处理空链表的情况
+    if (p->next == NULL) {
+        p->next = &SIGlist[i];
+        return 0;
+    }
+	while (p->next != NULL && sig > p->next->sig) {
+        p = p->next;
+    }
+	if (sig == p->next->sig) {
+		// 说明信号已经存在
+		SIGlist[i].sig = 0;
+		return 0;
+	}
+    SIGlist[i].next = p->next;
+    p->next = &SIGlist[i];
+	
+	return 0;
+}
+
+int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
+	// 从信号链表中找到第一个满足条件的信号
+	if (head == NULL || head->next == NULL) {
+		return -1;
+	}
+	struct siglist *p = head;
+	while (p->next != NULL)
+	{
+		if (((1 << (p->next->sig -1)) & sa_mask.sig) == 0) break;
+		p = p->next;
+	}
+	*sig = p->next->sig;
+	// 将信号从信号链表中移除
+	struct siglist *tmp = p->next;
+	p->next = tmp->next;
+	tmp->sig = 0;
+	tmp->next = NULL;
 	return 0;
 }
 
@@ -614,6 +693,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_set_sig_trapframe] = sys_set_sig_trapframe,
+	[SYS_set_sig_entry] = sys_set_sig_entry,
 	[SYS_get_sig_act] = sys_get_sig_act,
 	[SYS_set_sig_act] = sys_set_sig_act,
 	[SYS_set_sig_set] = sys_set_sig_set,

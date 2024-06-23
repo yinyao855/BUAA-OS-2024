@@ -43,10 +43,11 @@ struct Env {
 
 	// Challenge sigaction
 	u_int env_handlers[33]; // 信号处理函数
-    sigset_t env_sa_mask; // 信号掩码
-	struct sigstack *env_sig_stack;
+	sigset_t env_sa_mask_list[33]; // 每种信号对应的掩码
+    sigset_t env_sa_mask; // 进程的信号屏蔽字
+	struct siglist *env_sig_head;
 	u_int env_sig_entry;
-	u_int env_sig_flag;
+	// u_int env_sig_flag;
 	u_int env_protect[256];
 };
 

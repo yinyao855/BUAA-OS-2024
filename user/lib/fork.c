@@ -52,6 +52,28 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	user_panic("syscall_set_trapframe returned %d", r);
 }
 
+static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf, 
+                                        void (*sa_handler)(int), int signum, int envid) {
+    int r;
+	if (sa_handler != 0) {
+		sigset_t tmp;
+		tmp.sig = SIG2MASK(signum);
+		syscall_set_sig_set(envid, SIG_BLOCK, &tmp, NULL);
+        sa_handler(signum); //直接调用定义好的处理函数
+		syscall_set_sig_set(envid, SIG_UNBLOCK, &tmp, NULL);
+		r = syscall_set_sig_trapframe(0, tf);
+        user_panic("sig_entry syscall_set_trapframe returned %d", r);
+    }
+    switch (signum) {
+        case SIGKILL: case SIGSEGV: 
+            syscall_env_destroy(envid); //默认处理
+            user_panic("sig_entry syscall_env_destroy returned");
+        default:
+            r = syscall_set_sig_trapframe(0, tf);
+            user_panic("sig_entry syscall_set_trapframe returned %d", r);
+    }
+}
+
 /* Overview:
  *   Grant our child 'envid' access to the virtual page 'vpn' (with address 'vpn' * 'PAGE_SIZE') in
  * our (current env's) address space. 'PTE_COW' should be used to isolate the modifications on
@@ -100,6 +122,13 @@ static void duppage(u_int envid, u_int vpn) {
 	}
 }
 
+// 设置信号处理入口函数
+int env_set_sig_entry(void) {
+    try(syscall_set_sig_entry(0, sig_entry));
+    try(syscall_set_tlb_mod_entry(0, cow_entry));
+    return 0;
+}
+
 /* Overview:
  *   User-level 'fork'. Create a child and then copy our address space.
  *   Set up ours and its TLB Mod user exception entry to 'cow_entry'.
@@ -118,6 +147,11 @@ int fork(void) {
 	/* Step 1: Set our TLB Mod user exception entry to 'cow_entry' if not done yet. */
 	if (env->env_user_tlb_mod_entry != (u_int)cow_entry) {
 		try(syscall_set_tlb_mod_entry(0, cow_entry));
+	}
+
+	// 设置信号处理函数入口
+	if (env->env_sig_entry != (u_int)sig_entry) {
+		try(syscall_set_sig_entry(0, sig_entry));
 	}
 
 	/* Step 2: Create a child env that's not ready to be scheduled. */
