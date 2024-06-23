@@ -21,8 +21,8 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 	struct Page *p = NULL;
 
 	if (va < UTEMP) {
-		// sys_ukill(0, SIGSEGV);
-		panic("address too low");
+		sys_ukill(0, SIGSEGV);
+		// panic("address too low");
 	}
 
 	if (va >= USTACKTOP && va < USTACKTOP + PAGE_SIZE) {
@@ -103,14 +103,14 @@ void do_tlb_mod(struct Trapframe *tf) {
 }
 
 void do_signal(struct Trapframe *tf) {
-	struct siglist *sig_list = curenv->env_sig_head;
+	struct siglist *sig_list = &(curenv->env_sig_head);
 	// struct siglist *front = NULL;
 	// while (sig_list != NULL && getSig((&(curenv->env_sa_mask)), sig_list->sig) == 1) {
     // 	//找到第一个可以需要现在处理的信号
 	// 	front = sig_list;
 	// 	sig_list = sig_list->next;
 	// }
-	if (sig_list == NULL) {
+	if (sig_list->next == NULL) {
 		return;
 	}
 	int sig = 0;
@@ -126,7 +126,7 @@ void do_signal(struct Trapframe *tf) {
 	// }
 	// sig_list->next = NULL;
 
-	printk("do signal %d\n", sig);
+	// printk("do signal %d\n", sig);
 
 	if (sig == SIGKILL) {
 		env_destroy(curenv);

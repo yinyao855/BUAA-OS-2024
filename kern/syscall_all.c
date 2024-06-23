@@ -592,6 +592,8 @@ int sys_set_sig_act(u_int envid, int signum, struct sigaction *act) {
 
 	e->env_handlers[signum] = (u_int)act->sa_handler;
 	e->env_sa_mask = act->sa_mask;
+
+	// printk("env's signal: %d, handler: %d, sa mask: %d\n", signum, e->env_handlers[signum], e->env_sa_mask);
 	return 0;
 }
 
@@ -623,10 +625,13 @@ int sys_ukill(u_int envid, int sig) {
 	if (!isvalid(sig)) {
         return -1;
     }
+	// printk("receive signal: %d\n", sig);
+	
 	// 加入信号
 	try(envid2env(envid, &env, 1));
 	int i;
-	struct siglist *p = env->env_sig_head;
+	struct siglist *p = &env->env_sig_head;
+	struct siglist *q = p->next;
 	for (i = 0; i < 4096; i++)
 	{
 		if (SIGlist[i].sig == 0) { // 代表还没有分配
@@ -635,20 +640,23 @@ int sys_ukill(u_int envid, int sig) {
 			break;
 		}
 	}
+	// printk("allocate %d\n", i);
 	// 处理空链表的情况
     if (p->next == NULL) {
-        p->next = &SIGlist[i];
+        p->next = &(SIGlist[i]);
         return 0;
     }
-	while (p->next != NULL && sig > p->next->sig) {
-        p = p->next;
+	// printk("not empty!\n");
+	while (q != NULL && sig > q->sig) {
+		p = q;
+        q = q->next;
     }
-	if (sig == p->next->sig) {
+	if (sig == q->sig) {
 		// 说明信号已经存在
 		SIGlist[i].sig = 0;
 		return 0;
 	}
-    SIGlist[i].next = p->next;
+    SIGlist[i].next = q;
     p->next = &SIGlist[i];
 	
 	return 0;
@@ -656,21 +664,23 @@ int sys_ukill(u_int envid, int sig) {
 
 int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 	// 从信号链表中找到第一个满足条件的信号
-	if (head == NULL || head->next == NULL) {
+	if (head->next == NULL) {
 		return -1;
 	}
-	struct siglist *p = head;
-	while (p->next != NULL)
+
+	struct siglist *p = head, *q = head->next;
+	while (q != NULL)
 	{
-		if (((1 << (p->next->sig -1)) & sa_mask.sig) == 0) break;
-		p = p->next;
+		if (((1 << (q->sig -1)) & sa_mask.sig) == 0) break;
+		p = q;
+		q = q->next;
 	}
-	*sig = p->next->sig;
+	*sig = q->sig;
+	// printk("find signal %d\n", *sig);
 	// 将信号从信号链表中移除
-	struct siglist *tmp = p->next;
-	p->next = tmp->next;
-	tmp->sig = 0;
-	tmp->next = NULL;
+	p->next = q->next;
+	q->sig = 0;
+	q->next = NULL;
 	return 0;
 }
 
@@ -715,7 +725,8 @@ void do_syscall(struct Trapframe *tf) {
 	int (*func)(u_int, u_int, u_int, u_int, u_int);
 	int sysno = tf->regs[4];
 	if (sysno < 0 || sysno >= MAX_SYSNO) {
-		tf->regs[2] = -E_NO_SYS;
+		// tf->regs[2] = -E_NO_SYS;
+		sys_ukill(0, SIGSYS);
 		return;
 	}
 

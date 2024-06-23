@@ -267,6 +267,16 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	if (r != 0){ return -E_NO_FREE_ENV;}
 	e->env_parent_id = parent_id;
 
+	// 初始化信号相关变量
+	for (u_int i = 1; i <= 32; i++) {
+		e->env_handlers[i] = 0;
+		e->env_sa_mask_list[i].sig = 0;
+	}
+	e->env_sig_head.sig = 0;
+	e->env_sig_head.next = NULL;
+	e->env_sa_mask.sig = 0;
+	e->env_sig_entry = 0;
+
 	/* Step 4: Initialize the sp and 'cp0_status' in 'e->env_tf'.
 	 *   Set the EXL bit to ensure that the processor remains in kernel mode during context
 	 * recovery. Additionally, set UM to 1 so that when ERET unsets EXL, the processor

@@ -143,8 +143,6 @@ int spawn(char *prog, char **argv) {
 		goto err;
 	}
 
-	debugf("[%08x] spawn: %s\n", env->env_id, prog);
-
 	// Step 4: Use 'init_stack(child, argv, &sp)' to initialize the stack of the child.
 	// 'goto err1' if that fails.
 	u_int sp;

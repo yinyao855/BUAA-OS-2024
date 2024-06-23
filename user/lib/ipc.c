@@ -54,8 +54,8 @@ int sigaction(int signum, const struct sigaction *newact, struct sigaction *olda
     if (env_set_sig_entry() != 0) { // 为进程设置信号入口函数
         return -1;
     }
-    struct sigaction *tmp = newact;
-    return syscall_set_sig_act(0, signum, tmp);
+
+    return syscall_set_sig_act(0, signum, newact);
 }
 
 int kill(u_int envid, int sig)
@@ -119,8 +119,7 @@ int sigorset(sigset_t *__set, const sigset_t *__left, const sigset_t *__right) {
 }
 
 int sigprocmask(int __how, const sigset_t *__set, sigset_t *__oset) {
-    sigset_t *tmp = __set;
-    return syscall_set_sig_set(0, __how, tmp, __oset);
+    return syscall_set_sig_set(0, __how, __set, __oset);
 }
 
 int sigpending(sigset_t *__set)

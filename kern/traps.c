@@ -8,6 +8,7 @@ extern void handle_tlb(void);
 extern void handle_sys(void);
 extern void handle_mod(void);
 extern void handle_reserved(void);
+extern int sys_ukill(u_int, int);
 
 void (*exception_handlers[32])(void) = {
     [0 ... 31] = handle_reserved,
@@ -24,6 +25,7 @@ void (*exception_handlers[32])(void) = {
  *   'genex.S' wraps this function in 'handle_reserved'.
  */
 void do_reserved(struct Trapframe *tf) {
-	print_tf(tf);
-	panic("Unknown ExcCode %2d", (tf->cp0_cause >> 2) & 0x1f);
+	// print_tf(tf);
+    sys_ukill(0, SIGILL);
+	// panic("Unknown ExcCode %2d", (tf->cp0_cause >> 2) & 0x1f);
 }
