@@ -124,5 +124,5 @@ int sigprocmask(int __how, const sigset_t *__set, sigset_t *__oset) {
 
 int sigpending(sigset_t *__set)
 {
-    return 0;
+    return syscall_get_sig_pend(0, __set);
 }

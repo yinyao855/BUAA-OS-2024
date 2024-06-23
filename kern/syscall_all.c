@@ -673,6 +673,23 @@ int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 
 	struct siglist *p = head, *q = head->next;
 	int flag = 0;
+	while (q != NULL) 
+	{
+		if (q->sig == SIGKILL) {
+			flag = 1;
+			break;
+		}
+		p = q;
+		q = q->next;
+	}
+	if (flag) {
+		*sig = q->sig;
+		p->next = q->next;
+		q->sig = 0;
+		q->next = NULL;
+		return 0;
+	}
+	flag = 0;
 	while (q != NULL)
 	{
 		if (((1 << (q->sig -1)) & sa_mask.sig) == 0) {
@@ -692,6 +709,28 @@ int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 		return 0;
 	}
 	return -1;
+}
+
+// 获取被阻塞且未处理的信号集
+int sys_get_sig_pend(u_int envid, sigset_t *set) {
+	struct Env *env;
+	try(envid2env(envid, &env, 0));
+
+	struct siglist *p = &(env->env_sig_head);
+	struct siglist *q = p->next;
+	sigset_t sa_mask = env->env_sa_mask;
+	u_int tmp = 0;
+
+	while (q != NULL)
+	{
+		if ((SIG2MASK(q->sig) & sa_mask.sig) == 0) {
+			tmp |= SIG2MASK(q->sig);
+		}
+		p = q;
+		q = q->next;
+	}
+	set->sig = tmp;
+	return 0;
 }
 
 void *syscall_table[MAX_SYSNO] = {
@@ -719,6 +758,7 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_set_sig_act] = sys_set_sig_act,
 	[SYS_set_sig_set] = sys_set_sig_set,
 	[SYS_ukill] = sys_ukill,
+	[SYS_get_sig_pend] = sys_get_sig_pend,
 };
 
 /* Overview:

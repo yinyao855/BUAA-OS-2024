@@ -28,6 +28,7 @@ enum {
 	SYS_set_sig_act,
 	SYS_set_sig_set,
 	SYS_ukill,
+	SYS_get_sig_pend,
 	MAX_SYSNO,
 };
 

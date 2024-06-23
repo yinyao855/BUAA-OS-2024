@@ -101,3 +101,7 @@ int syscall_set_sig_set(u_int envid, int how, sigset_t *newset, sigset_t *oldset
 int syscall_kill(u_int envid, int sig) {
 	return msyscall(SYS_ukill, envid, sig);
 }
+
+int syscall_get_sig_pend(u_int envid, sigset_t *set) {
+	return msyscall(SYS_get_sig_pend, envid, set);
+}

@@ -77,6 +77,7 @@ int syscall_get_sig_act(u_int envid, int signum, struct sigaction *oldact);
 int syscall_set_sig_act(u_int envid, int signum, struct sigaction *act);
 int syscall_set_sig_set(u_int envid, int how, sigset_t *newset, sigset_t *oldset);
 int syscall_kill(u_int envid, int sig);
+int syscall_get_sig_pend(u_int envid, sigset_t *set);
 
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
