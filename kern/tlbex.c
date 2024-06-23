@@ -2,6 +2,8 @@
 #include <env.h>
 #include <pmap.h>
 
+extern int sys_ukill(u_int, int);
+
 /* Lab 2 Key Code "tlb_invalidate" */
 /* Overview:
  *   Invalidate the TLB entry with specified 'asid' and virtual address 'va'.
@@ -19,6 +21,7 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 	struct Page *p = NULL;
 
 	if (va < UTEMP) {
+		// sys_ukill(0, SIGSEGV);
 		panic("address too low");
 	}
 
@@ -122,6 +125,12 @@ void do_signal(struct Trapframe *tf) {
 	// 	front->next = sig_list->next;
 	// }
 	// sig_list->next = NULL;
+
+	printk("do signal %d\n", sig);
+
+	if (sig == SIGKILL) {
+		env_destroy(curenv);
+	}
 	
 	struct Trapframe tmp_tf = *tf;
 	if (tf->regs[29] < USTACKTOP || tf->regs[29] >= UXSTACKTOP) {

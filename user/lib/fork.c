@@ -65,7 +65,7 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
         user_panic("sig_entry syscall_set_trapframe returned %d", r);
     }
     switch (signum) {
-        case SIGKILL: case SIGSEGV: 
+        case SIGKILL: case SIGSEGV: case SIGILL: case SIGINT:
             syscall_env_destroy(envid); //默认处理
             user_panic("sig_entry syscall_env_destroy returned");
         default:

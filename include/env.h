@@ -48,7 +48,7 @@ struct Env {
 	struct siglist *env_sig_head;
 	u_int env_sig_entry;
 	// u_int env_sig_flag;
-	u_int env_protect[256];
+	// u_int env_protect[256];
 };
 
 LIST_HEAD(Env_list, Env);
