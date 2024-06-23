@@ -104,27 +104,16 @@ void do_tlb_mod(struct Trapframe *tf) {
 
 void do_signal(struct Trapframe *tf) {
 	struct siglist *sig_list = &(curenv->env_sig_head);
-	// struct siglist *front = NULL;
-	// while (sig_list != NULL && getSig((&(curenv->env_sa_mask)), sig_list->sig) == 1) {
-    // 	//找到第一个可以需要现在处理的信号
-	// 	front = sig_list;
-	// 	sig_list = sig_list->next;
-	// }
+
 	if (sig_list->next == NULL) {
 		return;
 	}
-	int sig = 0;
-	getSig(sig_list, curenv->env_sa_mask, &sig);
-	// if (sig_list->sig != SIGSEGV) {
-	// 	return;
-	// }
-    
-	// if (front == NULL) {
-	// 	curenv->env_sig_head = sig_list->next;
-	// } else {
-	// 	front->next = sig_list->next;
-	// }
-	// sig_list->next = NULL;
+	// printk("[%08x] signal xx: %d\n", curenv->env_id, sig_list->next->sig);
+	int sig = 0, r;
+	r = getSig(sig_list, curenv->env_sa_mask, &sig);
+	if (r == -1) {
+		return;
+	}
 
 	// printk("do signal %d\n", sig);
 

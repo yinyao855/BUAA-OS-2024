@@ -80,6 +80,8 @@ int sys_env_destroy(u_int envid) {
 	struct Env *e;
 	try(envid2env(envid, &e, 1));
 
+	sys_ukill(e->env_parent_id, SIGCHLD);
+	
 	printk("[%08x] destroying %08x\n", curenv->env_id, e->env_id);
 	env_destroy(e);
 	return 0;
@@ -271,7 +273,7 @@ int sys_exofork(void) {
 	for (u_int i = 1; i <= 32; i++) // 子进程继承父进程信号屏蔽集和处理函数
 	{
 		e->env_handlers[i] = curenv->env_handlers[i];
-		e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
+		// e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
 	}
 
 	return e->env_id;
@@ -625,13 +627,14 @@ int sys_ukill(u_int envid, int sig) {
 	if (!isvalid(sig)) {
         return -1;
     }
-	// printk("receive signal: %d\n", sig);
-	
+
 	// 加入信号
-	try(envid2env(envid, &env, 1));
+	try(envid2env(envid, &env, 0));
+	// printk("[%08x] receive signal: %d\n", env->env_id, sig);
 	int i;
-	struct siglist *p = &env->env_sig_head;
+	struct siglist *p = &(env->env_sig_head);
 	struct siglist *q = p->next;
+	
 	for (i = 0; i < 4096; i++)
 	{
 		if (SIGlist[i].sig == 0) { // 代表还没有分配
@@ -640,18 +643,18 @@ int sys_ukill(u_int envid, int sig) {
 			break;
 		}
 	}
-	// printk("allocate %d\n", i);
+	// printk("%d allocate %d\n", SIGlist[i].sig, i);
 	// 处理空链表的情况
     if (p->next == NULL) {
         p->next = &(SIGlist[i]);
         return 0;
     }
-	// printk("not empty!\n");
+	// printk("not empty! %x %d %x\n", p->next,p->next->sig, p->next->next);
 	while (q != NULL && sig > q->sig) {
 		p = q;
         q = q->next;
     }
-	if (sig == q->sig) {
+	if (q != NULL && sig == q->sig) {
 		// 说明信号已经存在
 		SIGlist[i].sig = 0;
 		return 0;
@@ -669,19 +672,26 @@ int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 	}
 
 	struct siglist *p = head, *q = head->next;
+	int flag = 0;
 	while (q != NULL)
 	{
-		if (((1 << (q->sig -1)) & sa_mask.sig) == 0) break;
+		if (((1 << (q->sig -1)) & sa_mask.sig) == 0) {
+			flag = 1;
+			break;
+		}
 		p = q;
 		q = q->next;
 	}
-	*sig = q->sig;
-	// printk("find signal %d\n", *sig);
-	// 将信号从信号链表中移除
-	p->next = q->next;
-	q->sig = 0;
-	q->next = NULL;
-	return 0;
+	if (flag) {
+		*sig = q->sig;
+		// printk("find signal %d\n", *sig);
+		// 将信号从信号链表中移除
+		p->next = q->next;
+		q->sig = 0;
+		q->next = NULL;
+		return 0;
+	}
+	return -1;
 }
 
 void *syscall_table[MAX_SYSNO] = {
