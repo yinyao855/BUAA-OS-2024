@@ -71,7 +71,7 @@ int sigemptyset(sigset_t *__set)
 
 int sigfillset(sigset_t *__set)
 {
-    __set->sig = 0xFFFF;
+    __set->sig = 0xFFFFFFFF;
     return 0;
 }
 
