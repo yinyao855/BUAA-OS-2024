@@ -273,7 +273,7 @@ int sys_exofork(void) {
 	for (u_int i = 1; i <= 32; i++) // 子进程继承父进程信号屏蔽集和处理函数
 	{
 		e->env_handlers[i] = curenv->env_handlers[i];
-		// e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
+		e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
 	}
 
 	return e->env_id;
@@ -578,7 +578,7 @@ int sys_get_sig_act(u_int envid, int signum, struct sigaction *oldact) {
 
 	if (oldact != NULL) {
 		oldact->sa_handler = (void *)e->env_handlers[signum];
-		oldact->sa_mask = e->env_sa_mask;
+		oldact->sa_mask = e->env_sa_mask_list[signum];
 	}
 	return 0;
 }
@@ -593,7 +593,7 @@ int sys_set_sig_act(u_int envid, int signum, struct sigaction *act) {
 	try(envid2env(envid, &e, 1));
 
 	e->env_handlers[signum] = (u_int)act->sa_handler;
-	e->env_sa_mask = act->sa_mask;
+	e->env_sa_mask_list[signum] = act->sa_mask;
 
 	// printk("env's signal: %d, handler: %d, sa mask: %d\n", signum, e->env_handlers[signum], e->env_sa_mask);
 	return 0;

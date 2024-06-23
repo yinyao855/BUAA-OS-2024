@@ -19,6 +19,9 @@ void libmain(int argc, char **argv) {
 	// set env to point at our env structure in envs[].
 	env = &envs[ENVX(syscall_getenvid())];
 
+	// 信号异常入口函数
+	env_set_sig_entry();
+
 	// call user main routine
 	main(argc, argv);
 

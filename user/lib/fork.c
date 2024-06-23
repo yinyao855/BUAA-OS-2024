@@ -56,11 +56,12 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
                                         void (*sa_handler)(int), int signum, int envid) {
     int r;
 	if (sa_handler != 0) {
-		sigset_t tmp;
-		tmp.sig = SIG2MASK(signum);
-		syscall_set_sig_set(envid, SIG_BLOCK, &tmp, NULL);
+		sigset_t new, old;
+		new.sig = SIG2MASK(signum);
+		syscall_set_sig_set(envid, SIG_BLOCK, &env->env_sa_mask_list[signum], &old);
+		syscall_set_sig_set(envid, SIG_BLOCK, &new, NULL);
         sa_handler(signum); //直接调用定义好的处理函数
-		syscall_set_sig_set(envid, SIG_UNBLOCK, &tmp, NULL);
+		syscall_set_sig_set(envid, SIG_SETMASK, &old, NULL);
 		r = syscall_set_sig_trapframe(0, tf);
         user_panic("sig_entry syscall_set_trapframe returned %d", r);
     }
