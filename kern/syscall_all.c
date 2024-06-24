@@ -606,6 +606,9 @@ int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
     //当oldset不为NULL时，还需将原有的信号掩码放在oldset指定的地址空间中
         oldset->sig = env->env_sa_mask.sig;
     }
+	if (set == NULL) {
+		return -1;
+	}
 	switch (how) {
     	case SIG_BLOCK: //将set参数中指定的信号添加到当前进程的信号掩码中
 			env->env_sa_mask.sig |= set->sig;

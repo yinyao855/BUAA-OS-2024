@@ -146,7 +146,7 @@ int sigorset(sigset_t *__set, const sigset_t *__left, const sigset_t *__right) {
 }
 
 int sigprocmask(int __how, const sigset_t *__set, sigset_t *__oset) {
-    if (__set == NULL || __oset == NULL) {
+    if (__how != SIG_BLOCK && __how != SIG_UNBLOCK && __how != SIG_SETMASK) {
         return -1;
     }
     return syscall_set_sig_set(0, __how, __set, __oset);
