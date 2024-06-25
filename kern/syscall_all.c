@@ -607,7 +607,7 @@ int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
         oldset->sig = env->env_sa_mask.sig;
     }
 	if (set == NULL) {
-		return -1;
+		return 0;
 	}
 	switch (how) {
     	case SIG_BLOCK: //将set参数中指定的信号添加到当前进程的信号掩码中
