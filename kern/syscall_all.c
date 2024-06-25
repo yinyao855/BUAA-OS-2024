@@ -780,7 +780,8 @@ void do_syscall(struct Trapframe *tf) {
 	int (*func)(u_int, u_int, u_int, u_int, u_int);
 	int sysno = tf->regs[4];
 	if (sysno < 0 || sysno >= MAX_SYSNO) {
-		// tf->regs[2] = -E_NO_SYS;
+		tf->regs[2] = -E_NO_SYS;
+		tf->cp0_epc+=4;
 		sys_ukill(0, SIGSYS);
 		return;
 	}
