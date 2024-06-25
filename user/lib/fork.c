@@ -57,7 +57,6 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
     int r;
 	if (signum == SIGKILL) {
 		syscall_env_destroy(envid);
-		return;
 	}
 	if (sa_handler != 0) {
 		sigset_t new, old;
