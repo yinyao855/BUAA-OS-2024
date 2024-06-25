@@ -596,7 +596,7 @@ int sys_set_sig_act(u_int envid, int signum, struct sigaction *act) {
 	try(envid2env(envid, &e, 1));
 
 	e->env_handlers[signum] = (u_int)act->sa_handler;
-	e->env_sa_mask_list[signum] = act->sa_mask;
+	e->env_sa_mask_list[signum].sig = act->sa_mask.sig & (~SIG2MASK(SIGKILL));
 
 	// printk("env's signal: %d, handler: %d, sa mask: %d\n", signum, e->env_handlers[signum], e->env_sa_mask);
 	return 0;
@@ -625,6 +625,7 @@ int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
     	default:
         	break;
     }
+	curenv->env_sa_mask.sig &= ~SIG2MASK(SIGKILL);
 	return 0;
 }
 
