@@ -120,9 +120,9 @@ void do_signal(struct Trapframe *tf) {
 
 	// printk("do signal %d\n", sig);
 
-	// if (sig == SIGKILL) {
-	// 	env_destroy(curenv);
-	// }
+	if (sig == SIGKILL) {
+		curenv->env_sa_mask.sig = 0xFFFFFFFF;
+	}
 	
 	struct Trapframe tmp_tf = *tf;
 	if (tf->regs[29] < USTACKTOP || tf->regs[29] >= UXSTACKTOP) {

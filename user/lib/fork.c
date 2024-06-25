@@ -56,7 +56,8 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
                                         void (*sa_handler)(int), int signum, int envid) {
     int r;
 	if (signum == SIGKILL) {
-		exit();
+		syscall_env_destroy(envid);
+		return;
 	}
 	if (sa_handler != 0) {
 		sigset_t new, old;
@@ -70,7 +71,7 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
     }
     switch (signum) {
         case SIGKILL: case SIGSEGV: case SIGILL: case SIGINT:
-            exit(); //默认处理
+            syscall_env_destroy(envid); //默认处理
             user_panic("sig_entry syscall_env_destroy returned");
         default:
             r = syscall_set_sig_trapframe(0, tf);

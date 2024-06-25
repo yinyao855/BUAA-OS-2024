@@ -80,7 +80,9 @@ int sys_env_destroy(u_int envid) {
 	struct Env *e;
 	try(envid2env(envid, &e, 1));
 
-	sys_ukill(e->env_parent_id, SIGCHLD);
+	if (e->env_parent_id != 0) {
+		sys_ukill(e->env_parent_id, SIGCHLD);
+	}
 	
 	printk("[%08x] destroying %08x\n", curenv->env_id, e->env_id);
 	env_destroy(e);
