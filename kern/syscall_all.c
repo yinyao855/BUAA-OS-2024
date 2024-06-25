@@ -693,6 +693,7 @@ int getSig(struct siglist *head, sigset_t sa_mask, int *sig) {
 		p->next = q->next;
 		q->sig = 0;
 		q->next = NULL;
+		head->next = NULL; // 清空剩余信号
 		return 0;
 	}
 	flag = 0;
