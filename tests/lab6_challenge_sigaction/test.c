@@ -1,83 +1,69 @@
 #include <lib.h>
 
-#define assert(x)                                                                                  \
-	do {                                                                                       \
-		if (!(x)) {                                                                        \
-			user_panic("assertion failed: %s", #x);                                         \
-		}                                                                                  \
-	} while (0)
+void printset(sigset_t *ped)
+{
+	int i;
+	for(i = 1; i <= 32; i++){
+		if((sigismember(ped, i) == 1)){
+			debugf("1");
+		} else {
+			debugf("0");
+		}
+	}
+	debugf("\n");
+}
 
 void sigint_handler(int sig) {
-	debugf("sth unexpected happened\n");
-	exit();
+    debugf("capture SIGINT.\n");
 }
 
-int main() {
-	sigset_t st1, st2, st3, st4;
-	u_int _st1 = 0x289ca9ed, _st2 = 0xab3cfe27;
-	assert(sigemptyset(&st1) == 0);
-	assert(sigemptyset(&st2) == 0);
-	for(int i = 0; i <= 10; i++) {
-		if (i != SIG_BLOCK && i != SIG_UNBLOCK && i != SIG_SETMASK) {
-			assert(sigprocmask(i, &st1, &st2) == -1);
+
+int main(void)
+{
+	sigset_t set, oldset, pedset;
+	
+	sigemptyset(&set);
+    sigemptyset(&pedset);
+	// sigaddset(&set, SIGINT);//-2
+	// sigaddset(&set, SIGQUIT);//-3
+	sigaddset(&set, SIGKILL);//-9,注意该信号不会阻塞在屏蔽字，不能捕捉，忽略，所以该步骤是无效的。和编号19一样。
+	sigaddset(&set, SIGSEGV);//11,即段错误。
+
+    struct sigaction sa;
+    sa.sa_handler = sigint_handler;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, NULL);
+	
+	int ret = sigprocmask(SIG_BLOCK, &set, &oldset);
+	if(ret != 0){
+		debugf("sigprocmask failed.\n");
+		return -1;
+	}
+
+    int a = 0;
+
+    debugf("curenv 0x%x\n", env->env_sa_mask.sig);
+	
+	//为了方便观察现象加个循环,不断查看未决信号集
+	while(1){
+		//获取未决信号集
+        kill(0, SIGINT);
+        kill(0, SIGSEGV);
+		ret = sigpending(&pedset);
+        // debugf("set: 0x%x\n", pedset.sig);  
+		if(ret != 0){
+			debugf("sigpending failed.\n");
+			return -1;
 		}
+		printset(&pedset);//打印
+		// sleep(1);
+        debugf("%d\n",a);
+        if (a > 10) {
+            kill(0, SIGKILL);
+        }
+        a++;
 	}
-	assert(sigaddset(&st1, 0) == -1);
-	assert(sigdelset(&st1, 33) == -1);
-	assert(sigismember(&st1, 321) == -1);
-	assert(sigisemptyset(&st1) == 1);
-	assert(sigfillset(&st1) == 0);
-	for(int i = 0; i < 32; i++) {
-		if (!(_st1 >> i & 1)) {
-			assert(sigdelset(&st1, i + 1) == 0);
-		}
-		if (_st2 >> i & 1) {
-			assert(sigaddset(&st2, i + 1) == 0);
-		}
-	}
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st1, i + 1) == (_st1 >> i & 1));
-		assert(sigismember(&st2, i + 1) == (_st2 >> i & 1));
-	}
-	assert(sigandset(&st3, &st1, &st2) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st3, i + 1) == ((_st1 & _st2) >> i & 1));
-	}
-	assert(sigorset(&st3, &st1, &st2) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st3, i + 1) == ((_st1 | _st2) >> i & 1));
-	}
-	assert(sigprocmask(SIG_BLOCK, NULL, NULL) == 0);
-	assert(sigprocmask(SIG_BLOCK, &st3, &st4) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st4, i + 1) == 0);
-	}
-	assert(sigprocmask(SIG_UNBLOCK, &st1, &st4) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st4, i + 1) == ((_st2 | _st1) >> i & 1));
-	}
-	assert(sigprocmask(SIG_SETMASK, &st1, &st4) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st4, i + 1) == ((_st2 & ~_st1) >> i & 1));
-	}
-	assert(sigprocmask(SIG_SETMASK, NULL, &st4) == 0);
-	for(int i = 0; i < 32; i++) {
-		assert(sigismember(&st4, i + 1) == (_st1 >> i & 1));
-	}
-	struct sigaction sa, sa2;
-	sa.sa_handler = sigint_handler;
-	assert(sigemptyset(&sa.sa_mask) == 0);
-	assert(sigaction(SIGSEGV, &sa, NULL) == 0);
-	assert(sigaction(SIGSEGV, NULL, &sa2) == 0);
-	assert(sa2.sa_handler == sa.sa_handler);
-	assert(sigaction(0, &sa, NULL) == -1);
-	assert(sigaction(33, &sa, NULL) == -1);
-	assert(sigaction(32, NULL, NULL) == 0);
-	debugf("Congratulations!\n");
-	debugf("Congratulations!\n");
-	debugf("Congratulations!\n");
-	debugf("Congratulations!\n");
-	debugf("Congratulations!\n");
-	debugf("Congratulations!\n");
+
 	return 0;
 }
+

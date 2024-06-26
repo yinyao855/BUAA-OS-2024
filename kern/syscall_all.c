@@ -277,7 +277,7 @@ int sys_exofork(void) {
 		e->env_handlers[i] = curenv->env_handlers[i];
 		e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
 	}
-	// e->env_sa_mask = curenv->env_sa_mask;
+	e->env_sa_mask = curenv->env_sa_mask;
 
 	return e->env_id;
 }
@@ -736,7 +736,7 @@ int sys_get_sig_pend(u_int envid, sigset_t *set) {
 
 	while (q != NULL)
 	{
-		if ((q->sig != SIGKILL) && ((SIG2MASK(q->sig) & sa_mask.sig) == 0)) {
+		if ((q->sig != SIGKILL) && ((SIG2MASK(q->sig) & sa_mask.sig) != 0)) {
 			tmp |= SIG2MASK(q->sig);
 		}
 		p = q;
