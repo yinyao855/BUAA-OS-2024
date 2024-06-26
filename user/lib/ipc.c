@@ -129,26 +129,26 @@ int sigisemptyset(const sigset_t *__set)
 
 // 计算两个信号集__left和__right的交集
 int sigandset(sigset_t *__set, const sigset_t *__left, const sigset_t *__right) {
-    if (__set == NULL || __left == NULL || __right == NULL) {
-        return -1;
-    }
+    // if (__set == NULL || __left == NULL || __right == NULL) {
+    //     return -1;
+    // }
     __set->sig = __left->sig & __right->sig;
     return 0;
 }
 
 // 计算两个信号集__left和__right的并集
 int sigorset(sigset_t *__set, const sigset_t *__left, const sigset_t *__right) {
-    if (__set == NULL || __left == NULL || __right == NULL) {
-        return -1;
-    }
+    // if (__set == NULL || __left == NULL || __right == NULL) {
+    //     return -1;
+    // }
     __set->sig = __left->sig | __right->sig;
     return 0;
 }
 
 int sigprocmask(int __how, const sigset_t *__set, sigset_t *__oset) {
-    if (__how != SIG_BLOCK && __how != SIG_UNBLOCK && __how != SIG_SETMASK) {
-        return -1;
-    }
+    // if (__how != SIG_BLOCK && __how != SIG_UNBLOCK && __how != SIG_SETMASK) {
+    //     return -1;
+    // }
     return syscall_set_sig_set(0, __how, __set, __oset);
 }
 
