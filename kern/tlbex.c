@@ -103,9 +103,9 @@ void do_tlb_mod(struct Trapframe *tf) {
 }
 
 void do_signal(struct Trapframe *tf) {
-	if ((tf->cp0_epc) > ULIM) {
-        return;
-    }
+	// if ((tf->cp0_epc) > ULIM) {
+    //     return;
+    // }
 	struct siglist *sig_list = &(curenv->env_sig_head);
 
 	if (sig_list->next == NULL) {
