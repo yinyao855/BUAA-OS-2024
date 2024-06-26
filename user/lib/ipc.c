@@ -47,6 +47,10 @@ int sigaction(int signum, const struct sigaction *newact, struct sigaction *olda
         return -1;
     }
 
+    if (signum == SIGKILL) {
+        return -1;
+    }
+
     if (syscall_get_sig_act(0, signum, oldact) != 0) {
         return -1;
     }
@@ -54,6 +58,10 @@ int sigaction(int signum, const struct sigaction *newact, struct sigaction *olda
     // if (env_set_sig_entry() != 0) { // 为进程设置信号入口函数
     //     return -1;
     // }
+
+    if (newact == NULL) {
+        return -1;
+    }
 
     return syscall_set_sig_act(0, signum, newact);
 }
@@ -147,6 +155,9 @@ int sigorset(sigset_t *__set, const sigset_t *__left, const sigset_t *__right) {
 
 int sigprocmask(int __how, const sigset_t *__set, sigset_t *__oset) {
     if (__how != SIG_BLOCK && __how != SIG_UNBLOCK && __how != SIG_SETMASK) {
+        return -1;
+    }
+    if (__set == NULL) {
         return -1;
     }
     return syscall_set_sig_set(0, __how, __set, __oset);
