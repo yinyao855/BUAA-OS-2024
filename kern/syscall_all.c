@@ -668,10 +668,10 @@ int sys_ukill(u_int envid, int sig) {
     SIGlist[i].next = q;
     p->next = &SIGlist[i];
 
-	if (sig == SIGKILL) {
-		env->env_sig_head.next = &SIGlist[i];
-		SIGlist[i].next = NULL;
-	}
+	// if (sig == SIGKILL) {
+	// 	env->env_sig_head.next = &SIGlist[i];
+	// 	SIGlist[i].next = NULL;
+	// }
 	
 	return 0;
 }
