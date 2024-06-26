@@ -278,6 +278,7 @@ int sys_exofork(void) {
 		e->env_sa_mask_list[i] = curenv->env_sa_mask_list[i];
 	}
 	e->env_sa_mask = curenv->env_sa_mask;
+	e->env_sig_head = curenv->env_sig_head;
 
 	return e->env_id;
 }
@@ -595,8 +596,10 @@ int sys_set_sig_act(u_int envid, int signum, struct sigaction *act) {
 
 	try(envid2env(envid, &e, 1));
 
-	e->env_handlers[signum] = (u_int)act->sa_handler;
-	e->env_sa_mask_list[signum] = act->sa_mask;
+	if (signum != SIGKILL) {
+		e->env_handlers[signum] = (u_int)act->sa_handler;
+	}
+	e->env_sa_mask_list[signum].sig = act->sa_mask.sig & (~SIG2MASK(SIGKILL));
 
 	// printk("env's signal: %d, handler: %d, sa mask: %d\n", signum, e->env_handlers[signum], e->env_sa_mask);
 	return 0;
@@ -625,6 +628,7 @@ int sys_set_sig_set(u_int envid, int how, sigset_t *set, sigset_t *oldset) {
     	default:
         	break;
     }
+	env->env_sa_mask.sig &= ~(SIG2MASK(SIGKILL));
 	return 0;
 }
 
