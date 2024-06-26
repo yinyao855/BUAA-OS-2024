@@ -736,7 +736,7 @@ int sys_get_sig_pend(u_int envid, sigset_t *set) {
 
 	while (q != NULL)
 	{
-		if ((q->sig != SIGKILL) && ((SIG2MASK(q->sig) & sa_mask.sig) != 0)) {
+		if ((SIG2MASK(q->sig) & sa_mask.sig) != 0) {
 			tmp |= SIG2MASK(q->sig);
 		}
 		p = q;
