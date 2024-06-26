@@ -3,7 +3,6 @@
 #include <pmap.h>
 
 extern int sys_ukill(u_int, int);
-extern int sys_env_destroy(u_int envid);
 
 /* Lab 2 Key Code "tlb_invalidate" */
 /* Overview:
@@ -144,15 +143,7 @@ void do_signal(struct Trapframe *tf) {
         
 		tf->cp0_epc = curenv->env_sig_entry;
 	} else {
-		// panic("sig but no user handler registered");
-		switch (sig)
-		{
-		case SIGSEGV: case SIGILL: case SIGINT:
-			sys_env_destroy(curenv->env_id);
-			break;
-		default:
-			break;
-		}
+		panic("sig but no user handler registered");
 	}
 }
 #endif

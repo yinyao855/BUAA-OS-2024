@@ -16,10 +16,10 @@ END(handle_\exception)
 FEXPORT(ret_from_exception)
 /*-----------------adding codes--------------*/
     move    a0, sp
-    addiu   sp, sp, -1000
+    addiu   sp, sp, -8
     jal     do_signal
     nop
-    addiu   sp, sp, 1000
+    addiu   sp, sp, 8
 /*-----------------finish codes--------------*/
 	RESTORE_ALL
 	eret

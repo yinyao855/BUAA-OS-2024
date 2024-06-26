@@ -56,10 +56,7 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
                                         void (*sa_handler)(int), int signum, int envid) {
     int r;
 	if (signum == SIGKILL) {
-		// syscall_env_destroy(envid);
-		sigset_t pre;
-		pre.sig = 0xFFFFFFFF;
-		syscall_set_sig_set(0, SIG_SETMASK, &pre,NULL);
+		syscall_env_destroy(envid);
 	}
 	if (sa_handler != 0 && signum != SIGKILL) {
 		sigset_t new, old;
@@ -68,11 +65,6 @@ static void __attribute__((noreturn)) sig_entry(struct Trapframe *tf,
 		syscall_set_sig_set(envid, SIG_BLOCK, &new, NULL);
         sa_handler(signum); //直接调用定义好的处理函数
 		syscall_set_sig_set(envid, SIG_SETMASK, &old, NULL);
-		switch (signum)
-		{
-		case SIGSEGV: case SIGINT: case SIGKILL:
-			tf->cp0_epc += 4;
-		}
 		r = syscall_set_sig_trapframe(0, tf);
         user_panic("sig_entry syscall_set_trapframe returned %d", r);
     }

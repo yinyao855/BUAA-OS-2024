@@ -55,10 +55,6 @@ int sigaction(int signum, const struct sigaction *newact, struct sigaction *olda
         return -1;
     }
 
-    // if (env_set_sig_entry() != 0) { // 为进程设置信号入口函数
-    //     return -1;
-    // }
-
     if (newact == NULL) {
         return -1;
     }

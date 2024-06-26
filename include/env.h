@@ -47,7 +47,6 @@ struct Env {
     sigset_t env_sa_mask; // 进程的信号屏蔽字
 	struct siglist env_sig_head;
 	u_int env_sig_entry;
-	// u_int env_sig_flag;
 	u_int env_protect[256];
 };
 
